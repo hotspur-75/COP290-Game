@@ -32,7 +32,7 @@ def reckon_board(board_data):
         for j in range(20):
             board_data[i][j] = 0
     count = 0
-    while count!= 50:
+    while count!= 60:
         x = random.choice(range(20))
         y = random.choice(range(20))
         if board_data[x][y] == 0 and x + y != 0:
@@ -83,7 +83,7 @@ fonter = pygame.font.Font("BASKVILL.ttf", 36)
 mfont = pygame.font.Font("BASKVILL.ttf",18)
 text = font.render("PLAY", True, (255, 0, 0))
 gtext = fonter.render("GIVE UP",True,(255,0,0))
-name = mfont.render("HP",True,(0,0,0))
+name = mfont.render("P",True,(0,0,0))
 button_rect = pygame.Rect(770-text.get_width()/2, 300-text.get_height()/2, text.get_width(), text.get_height())
 buttoner_rect = pygame.Rect(770-gtext.get_width()/2, 400-gtext.get_height()/2, gtext.get_width(), gtext.get_height())
 p.blit(name,(15-name.get_width()/2,15-name.get_height()/2))
@@ -92,8 +92,8 @@ px = 0
 py = 0
 vx = 0
 vy = 0
-sx = 19
-sy = 19
+sx = 10
+sy = 10
 
 t = 0
 
@@ -102,6 +102,7 @@ print_board(0,0,board_data=board_data,mfont=mfont)
 
 TIMEREVENT = pygame.USEREVENT + 1
 SNITCHMOVE = pygame.USEREVENT + 2
+WON = pygame.USEREVENT + 3
 
 while gameOn:
 
@@ -156,7 +157,20 @@ while gameOn:
                 for j in range(7):
                     if abs(i-3)+abs(j-3) <= 3 and vx+px+i-3 >= 0 and vx+px+i-3 < 20 and vy+py+j-3 >= 0 and vy+py+j-3 < 20:
                         board_data[vx+px+i-3][vy+py+j-3]%=10
-            print_board(vx,vy,board_data=board_data,mfont=mfont)
+            if px+vx==sx and py+vy==sy:
+                t = 0
+                reset_board(board_data=board_data)
+                vx = 0
+                vy = 0
+                px = 0
+                py = 0
+                sx = 0
+                sy = 0
+                screen.fill((0,0,0),button_rect)
+                screen.fill((0,0,0),buttoner_rect)
+                screen.fill((0,0,0),(748,478,44,44))
+                playing = False
+                screen.blit(text,(770-text.get_width()/2,300-text.get_height()/2)) 
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if button_rect.collidepoint(event.pos) and playing == False:
@@ -166,9 +180,8 @@ while gameOn:
                 screen.blit(gtext,(770-gtext.get_width()/2,400-gtext.get_height()/2))
                 screen.blit(ttext,(770-ttext.get_width()/2,300-ttext.get_height()/2))
                 reckon_board(board_data=board_data) 
-                print_board(vx,vy,board_data=board_data,mfont=mfont)
                 pygame.time.set_timer(TIMEREVENT,1000)  
-                pygame.time.set_timer(SNITCHMOVE,333)
+                pygame.time.set_timer(SNITCHMOVE,500)
             elif buttoner_rect.collidepoint(event.pos) and playing:
                 t = 0
                 reset_board(board_data=board_data)
@@ -176,7 +189,8 @@ while gameOn:
                 vy = 0
                 px = 0
                 py = 0
-                print_board(vx,vy,board_data=board_data,mfont=mfont)
+                sx = 0
+                sy = 0
                 screen.fill((0,0,0),button_rect)
                 screen.fill((0,0,0),buttoner_rect)
                 screen.fill((0,0,0),(748,478,44,44))
@@ -185,10 +199,11 @@ while gameOn:
             
         elif event.type == TIMEREVENT and playing:
             t+=1
-            x = random.choice(range(20))
-            y = random.choice(range(20))
-            if not(px==x and py == y):
-                board_data[x][y] = 9
+            for i in range(5):
+                x = random.choice(range(20))
+                y = random.choice(range(20))
+                if not(px==x and py == y):
+                    board_data[x][y] = 9
             ttext = font.render("%d" % t,True,(255,0,0))
             screen.fill((0,0,0),button_rect)
             screen.blit(ttext,(770-ttext.get_width()/2,300-ttext.get_height()/2))
@@ -207,5 +222,7 @@ while gameOn:
 
         elif event.type == QUIT:
             gameOn = False
+
+        print_board(vx,vy,board_data=board_data,mfont=mfont)
 
     pygame.display.flip()
