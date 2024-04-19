@@ -6,7 +6,7 @@ import random
 pygame.init()
  
 screen = pygame.display.set_mode((1000, 600))
-pygame.display.set_caption("Quidditch")
+pygame.display.set_caption("Catch Me If You Can")
  
 gameOn = True
 playing = False
@@ -78,15 +78,21 @@ def print_board(vx,vy,board_data,mfont):
 
 clock = pygame.time.Clock()
 
+img = pygame.image.load('icon.png')
+boom = pygame.mixer.Sound('bombsound.ogg')
+shout = pygame.mixer.Sound('shout.ogg')
 font = pygame.font.Font("BASKVILL.ttf", 48)
 fonter = pygame.font.Font("BASKVILL.ttf", 36)
 mfont = pygame.font.Font("BASKVILL.ttf",18)
 text = font.render("PLAY", True, (255, 0, 0))
+winningtext = fonter.render("YOU WON! :)",True,(255,0,0))
+losingtext = fonter.render("OH NO! YOU LOST :(",True,(255,0,0))
 gtext = fonter.render("GIVE UP",True,(255,0,0))
 name = mfont.render("P",True,(0,0,0))
 button_rect = pygame.Rect(770-text.get_width()/2, 300-text.get_height()/2, text.get_width(), text.get_height())
 buttoner_rect = pygame.Rect(770-gtext.get_width()/2, 400-gtext.get_height()/2, gtext.get_width(), gtext.get_height())
 p.blit(name,(15-name.get_width()/2,15-name.get_height()/2))
+pygame.display.set_icon(img)
 
 px = 0
 py = 0
@@ -149,12 +155,15 @@ while gameOn:
                 vx+=1
                 px-=1
             elif event.key == K_LSHIFT or event.key == K_RSHIFT and playing:
+                pygame.mixer.Sound.play(boom)
                 t+=5
                 for i in range(3):
                     for j in range(3):
                         if i-1+vx+px >= 0 and i-1+vx+px < 20 and j-1+vy+py >= 0 and j-1+vy+py < 20:
                             board_data[i-1+vx+px][j-1+vy+py] = 0    
                         if i-1+vx+px == sx and j-1+vy+py == sy:
+                            screen.blit(losingtext,(770-losingtext.get_width()/2,150-losingtext.get_height()/2))
+                            pygame.mixer.Sound.play(shout)
                             t = 0
                             reset_board(board_data=board_data)
                             vx = 0
@@ -173,6 +182,9 @@ while gameOn:
                     if abs(i-3)+abs(j-3) <= 3 and vx+px+i-3 >= 0 and vx+px+i-3 < 20 and vy+py+j-3 >= 0 and vy+py+j-3 < 20:
                         board_data[vx+px+i-3][vy+py+j-3]%=10
             if px+vx==sx and py+vy==sy:
+                screen.blit(winningtext,(770-winningtext.get_width()/2,150-winningtext.get_height()/2))
+                scoretext = mfont.render("Your score is -%d!" % (t),True,(255,0,0))
+                screen.blit(scoretext,(770-scoretext.get_width()/2,200-scoretext.get_height()/2))
                 t = 0
                 reset_board(board_data=board_data)
                 vx = 0
@@ -191,12 +203,13 @@ while gameOn:
             if button_rect.collidepoint(event.pos) and playing == False:
                 playing = True
                 screen.fill((0,0,0),button_rect)
+                screen.fill((0,0,0),(550,100,600,200))
                 ttext = font.render("0",True,(255,0,0))
                 screen.blit(gtext,(770-gtext.get_width()/2,400-gtext.get_height()/2))
                 screen.blit(ttext,(770-ttext.get_width()/2,300-ttext.get_height()/2))
                 reckon_board(board_data=board_data) 
                 pygame.time.set_timer(TIMEREVENT,1000)  
-                pygame.time.set_timer(SNITCHMOVE,500)
+                pygame.time.set_timer(SNITCHMOVE,1000)
             elif buttoner_rect.collidepoint(event.pos) and playing:
                 t = 0
                 reset_board(board_data=board_data)
@@ -224,20 +237,17 @@ while gameOn:
             screen.blit(ttext,(770-ttext.get_width()/2,300-ttext.get_height()/2))
 
         elif event.type == SNITCHMOVE and playing:
-            if sx > px+vx:
+            if sx - px+vx > 3:
                 sx+=1
             else:
                 sx-=1
-            if sy > py+sy:
+            if sy - py+sy > 3:
                 sy+=1
             else:
                 sy-=1
-            sx+=(random.choice(range(5))-2)
-            sy+=(random.choice(range(5))-2)
-            if sx > 19:
-                sx = 19
-            elif sx < 0:
-                sx = 0
+            sx+=(random.choice(range(3))-1)
+            sy+=(random.choice(range(3))-1)
+            sx%=20
             if sy > 19:
                 sy = 19
             elif sy < 0:
