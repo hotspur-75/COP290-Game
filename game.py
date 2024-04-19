@@ -6,7 +6,7 @@ import random
 pygame.init()
  
 screen = pygame.display.set_mode((1000, 600))
-pygame.display.set_caption("batana bro")
+pygame.display.set_caption("Quidditch")
  
 gameOn = True
 playing = False
@@ -32,7 +32,7 @@ def reckon_board(board_data):
         for j in range(20):
             board_data[i][j] = 0
     count = 0
-    while count!= 60:
+    while count!= 120:
         x = random.choice(range(20))
         y = random.choice(range(20))
         if board_data[x][y] == 0 and x + y != 0:
@@ -119,6 +119,7 @@ while gameOn:
         screen.blit(surf,(748,478))
         screen.blit(surf2,(750,480))
         screen.blit(surf3,(750+vx*2,480+vy*2))
+        screen.fill((255,0,0),(750+2*sx,480+2*sy,2,2))
     
     for event in pygame.event.get():
          
@@ -153,6 +154,20 @@ while gameOn:
                     for j in range(3):
                         if i-1+vx+px >= 0 and i-1+vx+px < 20 and j-1+vy+py >= 0 and j-1+vy+py < 20:
                             board_data[i-1+vx+px][j-1+vy+py] = 0    
+                        if i-1+vx+px == sx and j-1+vy+py == sy:
+                            t = 0
+                            reset_board(board_data=board_data)
+                            vx = 0
+                            vy = 0
+                            px = 0
+                            py = 0
+                            sx = 10
+                            sy = 10
+                            screen.fill((0,0,0),button_rect)
+                            screen.fill((0,0,0),buttoner_rect)
+                            screen.fill((0,0,0),(748,478,44,44))
+                            playing = False
+                            screen.blit(text,(770-text.get_width()/2,300-text.get_height()/2)) 
             for i in range(7):
                 for j in range(7):
                     if abs(i-3)+abs(j-3) <= 3 and vx+px+i-3 >= 0 and vx+px+i-3 < 20 and vy+py+j-3 >= 0 and vy+py+j-3 < 20:
@@ -164,8 +179,8 @@ while gameOn:
                 vy = 0
                 px = 0
                 py = 0
-                sx = 0
-                sy = 0
+                sx = 10
+                sy = 10
                 screen.fill((0,0,0),button_rect)
                 screen.fill((0,0,0),buttoner_rect)
                 screen.fill((0,0,0),(748,478,44,44))
@@ -189,8 +204,8 @@ while gameOn:
                 vy = 0
                 px = 0
                 py = 0
-                sx = 0
-                sy = 0
+                sx = 10
+                sy = 10
                 screen.fill((0,0,0),button_rect)
                 screen.fill((0,0,0),buttoner_rect)
                 screen.fill((0,0,0),(748,478,44,44))
@@ -202,15 +217,23 @@ while gameOn:
             for i in range(5):
                 x = random.choice(range(20))
                 y = random.choice(range(20))
-                if not(px==x and py == y):
+                if not(px==x and py == y) and board_data[x][y] < 10:
                     board_data[x][y] = 9
             ttext = font.render("%d" % t,True,(255,0,0))
             screen.fill((0,0,0),button_rect)
             screen.blit(ttext,(770-ttext.get_width()/2,300-ttext.get_height()/2))
 
         elif event.type == SNITCHMOVE and playing:
-            sx+=(random.choice(range(3))-1)
-            sy+=(random.choice(range(3))-1)
+            if sx > px+vx:
+                sx+=1
+            else:
+                sx-=1
+            if sy > py+sy:
+                sy+=1
+            else:
+                sy-=1
+            sx+=(random.choice(range(5))-2)
+            sy+=(random.choice(range(5))-2)
             if sx > 19:
                 sx = 19
             elif sx < 0:
